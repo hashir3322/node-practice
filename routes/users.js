@@ -22,5 +22,8 @@ router.route('/getAllUsers')
 router.route('/register')
     .post(authController.register);
 
+router.route('/test')
+    .get(authController.test);
+
 
 export default router;

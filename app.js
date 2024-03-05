@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 
 // app.use(cookieParser());
 
-app.use('/users', userRouter);
+app.use('/api/users', userRouter);
 
 
 app.use(globalErrorHandler);
