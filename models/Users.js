@@ -8,7 +8,8 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: [true, 'Username is required'],
-        unique: true
+        unique: [true, 'Email is already taken'],
+        
     },
     password: {
         type: String,
