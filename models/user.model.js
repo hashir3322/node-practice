@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const userSchema = new Schema({
     name: {
@@ -7,36 +8,39 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        required: [true, 'Username is required'],
+        required: [true, 'Email is required'],
         unique: [true, 'Email is already taken'],
         
     },
     password: {
         type: String,
         required: [true, 'Password is required'],
+        minlength: [8, "Password should be at least 8 characters"],
         select: false
     },
-    roles: {
-        type: [String],
+    role: {
+        type: String,
         enum: {
             values: ['Employee', 'Manager', 'Owner'],
             message: 'Invalid Role'
         },
-        default: ["Employee"]
+        default: 'Employee'
     },
     active: {
         type: Boolean,
         default: true
     }
-}, {
-    toJSON: {
-        transform: function (doc, ret){
-            delete ret.__v;
-        }
+})
+
+userSchema.pre('save', async function (next){
+    if(!this.isModified('password')){
+        next();
     }
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
 })
 
 
-const User = model('user', userSchema);
+const User = model('User', userSchema);
 
 export default User;

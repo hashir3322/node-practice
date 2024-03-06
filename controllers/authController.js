@@ -1,4 +1,4 @@
-import User from '../models/Users.js';
+import User from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -6,12 +6,12 @@ export const authController = {
     login: async (req, res) => {
         try {
 
-            const { username, password } = req.body;
-            if (!username || !password) {
+            const { name, password } = req.body;
+            if (!name || !password) {
                 return res.status(400).json({ message: 'All fields are required' })
             }
 
-            const user = await User.findOne({ username }).select("+password").exec();
+            const user = await User.findOne({ name }).select("+password").exec();
 
             if (!user || !user.active) {
                 return res.status(400).json({ message: 'no user found' });
@@ -26,7 +26,7 @@ export const authController = {
             const accessToken = jwt.sign(
                 {
                     "UserInfo": {
-                        "username": user.username,
+                        "name": user.name,
                         "roles": user.roles
                     }
                 },
@@ -63,17 +63,18 @@ export const authController = {
     // Create a new user
     register: async (req, res) => {
         try {
-            const { username, password, roles } = req.body;
+            const { name, email, password, roles } = req.body;
 
-            if (!username || !password) {
+            
+            if (!name || !password) {
                 return res.status(400).json({
                     message: 'All fields are required',
                 })
             }
 
-            const hashedPassword = await bcrypt.hash(password, 10);
+            // const hashedPassword = await bcrypt.hash(password, 10);
 
-            const userObj = { username, password: hashedPassword, roles }
+            const userObj = { name, email, password, roles }
 
             const newUser = await User.create(userObj);
 
@@ -82,7 +83,8 @@ export const authController = {
             res.status(201).json(newUser)
 
         } catch (error) {
-            res.status(404).json({
+            
+            res.status(400).json({
                 status: 'failed',
                 error: error
             })
@@ -91,11 +93,11 @@ export const authController = {
     },
 
     test: async (req, res) => {
-        return res.status(200).json({'success': 'true'})
+        return res.status(200).json({ 'body': req.body })
     }
 
 
-    
+
 }
 
 
