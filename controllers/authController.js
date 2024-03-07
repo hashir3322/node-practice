@@ -1,6 +1,8 @@
 import User from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import generateToken from '../utils/generateToken.js';
+import catchAsync from '../utils/catchAsync.js';
 
 export const authController = {
     login: async (req, res) => {
@@ -20,19 +22,21 @@ export const authController = {
             const match = await bcrypt.compare(password, user.password);
 
             if (!match) {
-                return res.status(401).json({ message: 'Unauthorized' });
+                return res.status(400).json({ message: 'Incorrect email or password' });
             }
 
-            const accessToken = jwt.sign(
-                {
-                    "UserInfo": {
-                        "name": user.name,
-                        "roles": user.roles
-                    }
-                },
-                process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '160s' }
-            )
+            const token = generateToken(res,user._id);
+            
+            // const accessToken = jwt.sign(
+            //     {
+            //         "UserInfo": {
+            //             "name": user.name,
+            //             "roles": user.role
+            //         }
+            //     },
+            //     process.env.JWT_SECRET,
+            //     { expiresIn: process.env.JWT_EXPIRES_IN }
+            // )
 
 
             res.status(200).json({
@@ -61,7 +65,7 @@ export const authController = {
     },
 
     // Create a new user
-    register: async (req, res) => {
+    register: catchAsync( async (req, res) => {
         try {
             const { name, email, password, roles } = req.body;
 
@@ -83,14 +87,14 @@ export const authController = {
             res.status(201).json(newUser)
 
         } catch (error) {
-            
+
             res.status(400).json({
                 status: 'failed',
                 error: error
             })
         }
 
-    },
+    }),
 
     test: async (req, res) => {
         return res.status(200).json({ 'body': req.body })
@@ -154,7 +158,7 @@ export const authController = {
 //                             "username": foundUser.username
 //                         }
 //                     },
-//                     process.env.ACCESS_TOKEN_SECRET,
+//                     process.env.JWT_SECRET,
 //                     { expiresIn: '10s' }
 //                 )
 
