@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import generateToken from '../utils/generateToken.js';
 import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 
 export const authController = {
     login: async (req, res) => {
@@ -25,8 +26,8 @@ export const authController = {
                 return res.status(400).json({ message: 'Incorrect email or password' });
             }
 
-            const token = generateToken(res,user._id);
-            
+            const token = generateToken(res, user._id);
+
             // const accessToken = jwt.sign(
             //     {
             //         "UserInfo": {
@@ -65,34 +66,24 @@ export const authController = {
     },
 
     // Create a new user
-    register: catchAsync( async (req, res) => {
-        try {
-            const { name, email, password, roles } = req.body;
+    register: catchAsync(async (req, res, next) => {
 
-            
-            if (!name || !password) {
-                return res.status(400).json({
-                    message: 'All fields are required',
-                })
-            }
+        const { name, email, password, roles } = req.body;
 
-            // const hashedPassword = await bcrypt.hash(password, 10);
 
-            const userObj = { name, email, password, roles }
+        // if (!name || !password || !email) {
+        //     return next(new AppError('All fields are required', 400));
+        // }
 
-            const newUser = await User.create(userObj);
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
-            newUser.password = undefined;
+        const userObj = { name, email, password, roles }
 
-            res.status(201).json(newUser)
+        const newUser = await User.create(userObj);
 
-        } catch (error) {
+        newUser.password = undefined;
 
-            res.status(400).json({
-                status: 'failed',
-                error: error
-            })
-        }
+        res.status(201).json(newUser);
 
     }),
 
