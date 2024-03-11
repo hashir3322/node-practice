@@ -9,29 +9,36 @@ export const authController = {
     login: async (req, res) => {
         try {
 
-            const { name, password } = req.body;
-            if (!name || !password) {
-                return res.status(400).json({ message: 'All fields are required' })
+            const { email, password } = req.body;
+            
+            if (!email) {
+                return next(new AppError('Email is required', 400));
             }
 
-            const user = await User.findOne({ name }).select("+password").exec();
-
-            if (!user || !user.active) {
-                return res.status(400).json({ message: 'no user found' });
+            if (!password) {
+                return next(new AppError('Password is required', 400));
             }
 
-            const match = await bcrypt.compare(password, user.password);
+            const user = await User.findOne({ email }).select("+password").exec();
+
+            if (!user) {
+                return next(new AppError('Invalid email or password', 400));
+            }
+
+            const match = await User.matchPasswords(password,user.password);
+            
+            // const match = await bcrypt.compare(password, user.password);
 
             if (!match) {
-                return res.status(400).json({ message: 'Incorrect email or password' });
+                return next(new AppError('Invalid email or password', 400));
             }
 
-            const token = generateToken(res, user._id);
+            const accessToken = generateToken(res, user._id);
 
             // const accessToken = jwt.sign(
             //     {
             //         "UserInfo": {
-            //             "name": user.name,
+            //             "email": user.name,
             //             "roles": user.role
             //         }
             //     },
@@ -69,13 +76,6 @@ export const authController = {
     register: catchAsync(async (req, res, next) => {
 
         const { name, email, password, roles } = req.body;
-
-
-        // if (!name || !password || !email) {
-        //     return next(new AppError('All fields are required', 400));
-        // }
-
-        // const hashedPassword = await bcrypt.hash(password, 10);
 
         const userObj = { name, email, password, roles }
 

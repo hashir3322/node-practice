@@ -15,7 +15,7 @@ const handleDuplicateFieldsDB = err => {
 
 
 function globalErrorHandler(err, req, res, next) {
-  // console.log('in global');
+  console.log('in global');
 
 
   // if(err.name === '')

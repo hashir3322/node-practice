@@ -26,10 +26,11 @@ const userSchema = new Schema({
         },
         default: 'Employee'
     },
-    active: {
-        type: Boolean,
-        default: true
-    }
+    // active: {
+    //     type: Boolean,
+    //     default: true,
+    //     select: false,
+    // }
 })
 
 userSchema.pre('save', async function (next){
@@ -40,6 +41,9 @@ userSchema.pre('save', async function (next){
     this.password = await bcrypt.hash(this.password, salt);
 })
 
+userSchema.methods.matchPasswords = async function(enteredPassword, userPassword){
+    return await bcrypt.compare(enteredPassword, userPassword);
+}
 
 const User = model('User', userSchema);
 
