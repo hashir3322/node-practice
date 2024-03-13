@@ -1,13 +1,12 @@
 import User from '../models/user.model.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+// import bcrypt from 'bcrypt';
+// import jwt from 'jsonwebtoken';
 import generateToken from '../utils/generateToken.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
 export const authController = {
-    login: async (req, res) => {
-        try {
+    login: catchAsync(async (req, res, next) => {
 
             const { email, password } = req.body;
             
@@ -25,7 +24,7 @@ export const authController = {
                 return next(new AppError('Invalid email or password', 400));
             }
 
-            const match = await User.matchPasswords(password,user.password);
+            const match = await user.matchPassword(password,user.password);
             
             // const match = await bcrypt.compare(password, user.password);
 
@@ -35,30 +34,12 @@ export const authController = {
 
             const accessToken = generateToken(res, user._id);
 
-            // const accessToken = jwt.sign(
-            //     {
-            //         "UserInfo": {
-            //             "email": user.name,
-            //             "roles": user.role
-            //         }
-            //     },
-            //     process.env.JWT_SECRET,
-            //     { expiresIn: process.env.JWT_EXPIRES_IN }
-            // )
-
-
             res.status(200).json({
                 accessToken
             })
-        } catch (error) {
-            res.status(404).json({
-                status: 'failed',
-                err: error
-            })
-        }
-    },
+    }),
     // Get all users
-    getAllUsers: async (req, res) => {
+    getAllUsers: async (req, res, next) => {
         try {
 
             // const users = User.find().select('-password').lean();

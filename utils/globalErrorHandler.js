@@ -7,7 +7,7 @@ const handleValidationErrorsDB = err => {
 }
 
 const handleDuplicateFieldsDB = err => {
-  const errorFieldName = Object.values(err.keyValue)[0];
+  const errorFieldName = Object.keys(err.keyValue)[0];
 
   const msg = `${errorFieldName}: ${err.keyValue[errorFieldName]} is not available.`;
   return new AppError(msg, 400);
@@ -21,15 +21,15 @@ function globalErrorHandler(err, req, res, next) {
   // if(err.name === '')
   // if (err.name === 'CastError') {
   //   err = handleCastErrorDB(err);
-
   // }
+
   if (err.name === 'ValidationError') {
     err = handleValidationErrorsDB(err);
   }
 
-  // if (err?.code === 11000) {
-  //   err = handleDuplicateFieldsDB(err);
-  // }
+  if (err?.code === 11000) {
+    err = handleDuplicateFieldsDB(err);
+  }
 
 
   err.statusCode = err.statusCode || 500;

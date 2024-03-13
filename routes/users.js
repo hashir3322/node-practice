@@ -22,8 +22,8 @@ router.route('/getAllUsers')
 router.route('/register')
     .post(authController.register);
 
-// router.route('/test')
-//     .post(verifyJWT,authController.test);
+router.route('/test')
+    .post(verifyJWT, authController.test);
 
 
 export default router;

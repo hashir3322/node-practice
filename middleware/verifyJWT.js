@@ -6,13 +6,12 @@ const { verify } = jwt;
 const verifyJWT = (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
 
+
     if(!authHeader){
-        // return res.status(401).json({status: 'Unauthorized'})
         return next(new AppError('Unauthorized', 401));
     }
 
     if(!authHeader.startsWith('Bearer ')) {
-        // return res.status(401).json({status: 'Unauthorized'})
         return next(new AppError('Unauthorized', 401));
     }
 
@@ -20,7 +19,7 @@ const verifyJWT = (req, res, next) => {
 
     verify(
         token,
-        process.env.REFRESH_TOKEN_SECRET,
+        process.env.JWT_SECRET,
         (err, decoded) => {
             if(err){
                 return next(new AppError('Unauthorized', 401));
